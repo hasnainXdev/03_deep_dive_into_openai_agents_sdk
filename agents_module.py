@@ -54,9 +54,8 @@ agent = Agent(
     name="MathAssistant",
     instructions="You are a math assistant. Use the provided tools to perform calculations and explain results clearly.",
     model=model,
-    output_type=str,
     tools=[square_tool],
-    hooks=[MyAgentHooks()],
+    hooks=[MyAgentHooks],
 )
 
 
