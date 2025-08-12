@@ -65,4 +65,4 @@ agent = Agent(
 result = Runner.run_sync(agent, input="give me user data")
 
 
-print (agent.tools)
+print(agent.tools)
