@@ -59,7 +59,9 @@ agent = Agent(
     tools=[add, human_review],
     # tool_use_behavior="stop_on_first_tool"
     tool_use_behavior=StopAtTools([add]),
-    model_settings=ModelSettings(tool_choice="required") # default to auto, also include none means empty
+    model_settings=ModelSettings(
+        tool_choice="required"
+    ),  # default to auto, also include none means empty
 )
 
 result = Runner.run_sync(
