@@ -31,6 +31,9 @@ model = OpenAIChatCompletionsModel(
     model="gemini-2.0-flash", openai_client=external_client
 )
 
+class UserContext(BaseModel):
+    username:str
+    age:int
 
 def kuch_kar(data: str) -> str:
     return "kardia kuch"
@@ -40,12 +43,12 @@ class FunctionArgs(BaseModel):
     username:str
     age: int
     
-async def run_function(ctx:RunContextWrapper[Any], args:str)-> str:
-    parsed = FunctionArgs.model_validate_json(args)
+async def run_function(ctx:RunContextWrapper[UserContext])-> str:
+    parsed = FunctionArgs.model_validate_json(ctx)
     return kuch_kar(data=f"{parsed.username} is {parsed.age} year old")
 
 
-tool = FunctionTool(
+user_context_tool = FunctionTool(
     name="process_user",
     description="processs extracted user data",
     params_json_schema=FunctionArgs.model_json_schema(),
@@ -56,13 +59,16 @@ tool = FunctionTool(
 
 agent = Agent(
     name="Assistant", 
-    instructions="you are an expert assistant who answer user queries", 
+    instructions="you are an expert assistant who answer user queries, only use tools never guess, use the user_context_tool to get user data", 
     model=model,
-    tools=[tool]
+    tools=[user_context_tool]
 )
 
 
-result = Runner.run_sync(agent, input="give me user data")
+user_data = UserContext(username="arvind shrinvas", age="69")
+result = Runner.run_sync(agent, input="give me user data", context=user_data)
 
 
 print(agent.tools)
+
+print(result.final_output)
