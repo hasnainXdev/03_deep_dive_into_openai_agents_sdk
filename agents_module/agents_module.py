@@ -5,9 +5,9 @@ from agents import (
     Agent,
     Runner,
     OpenAIChatCompletionsModel,
-    RunConfig,
     function_tool,
     set_tracing_disabled,
+    RunContextWrapper,
 )
 from agents.lifecycle import AgentHooks, RunHooks
 
@@ -45,7 +45,7 @@ square_tool = function_tool(square_number)
 
 # Define a custom hook for lifecycle events
 class MyAgentHooks(AgentHooks):
-    async def on_agent_start(self, context, agent):
+    async def on_agent_start(self, context: RunContextWrapper, agent: Agent):
         print(f"Agent {agent.name} is starting to process your request!")
 
 
@@ -55,7 +55,7 @@ agent = Agent(
     instructions="You are a math assistant. Use the provided tools to perform calculations and explain results clearly.",
     model=model,
     tools=[square_tool],
-    hooks=[MyAgentHooks],
+    hooks=MyAgentHooks,
 )
 
 
