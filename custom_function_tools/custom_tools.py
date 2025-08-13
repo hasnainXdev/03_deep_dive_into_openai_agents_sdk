@@ -8,18 +8,19 @@ from agents import (
     function_tool,
     set_tracing_disabled,
     RunContextWrapper,
-    FunctionTool
+    FunctionTool,
+    enable_verbose_stdout_logging,
 )
 from typing import Any
 from openai import AsyncOpenAI
-from pydantic import BaseModel
+from pydantic import BaseModel, ValidationError
 
 dotenv.load_dotenv()
 
 # ====== SETUP ======
 gemini_api_key = os.getenv("GEMINI_API_KEY")
 
-
+# enable_verbose_stdout_logging()
 set_tracing_disabled(disabled=True)
 
 external_client = AsyncOpenAI(
@@ -31,44 +32,62 @@ model = OpenAIChatCompletionsModel(
     model="gemini-2.0-flash", openai_client=external_client
 )
 
-class UserContext(BaseModel):
-    username:str
-    age:int
-
-def kuch_kar(data: str) -> str:
-    return "kardia kuch"
-
 
 class FunctionArgs(BaseModel):
-    username:str
+    username: str
     age: int
-    
-async def run_function(ctx:RunContextWrapper[UserContext])-> str:
-    parsed = FunctionArgs.model_validate_json(ctx)
+
+
+# ----- Tool Logic -----
+def kuch_kar(data: str) -> str:
+    print("called")
+    return f"kardia kuch: {data}"
+
+
+async def run_function(ctx: RunContextWrapper[FunctionArgs]) -> str:
+    print("called")
+    parsed = FunctionArgs.model_validate_json(ctx.context)
     return kuch_kar(data=f"{parsed.username} is {parsed.age} year old")
 
 
-user_context_tool = FunctionTool(
+# @function_tool
+# def run_function(ctx: RunContextWrapper[UserContext]) -> str:
+#     print("called")
+#     return f"{ctx.context.username} is {ctx.context.age} year old"
+
+# ----- Tool Definition -----
+user_data_tool = FunctionTool(
     name="process_user",
-    description="processs extracted user data",
+    description="process extracted user data",
     params_json_schema=FunctionArgs.model_json_schema(),
-    on_invoke_tool=run_function
+    on_invoke_tool=run_function,
 )
 
-
-
+# ----- Agent -----
 agent = Agent(
-    name="Assistant", 
-    instructions="you are an expert assistant who answer user queries, only use tools never guess, use the user_context_tool to get user data", 
+    name="Assistant",
+    instructions=(
+        """
+        You are an expert assistant, only use tools never guess
+        
+        !important
+        use the `user_data_tool` tool to get user age and username
+        
+
+        """
+    ),
     model=model,
-    tools=[user_context_tool]
+    tools=[user_data_tool],
+    tool_use_behavior="stop_on_first_tool",
 )
 
+# ====== TEST RUN ======
+# Case 1: Valid data
+user_data_valid = FunctionArgs(username="arvind shrinvas", age=69)
+result1 = Runner.run_sync(agent, input="give me user data", context=user_data_valid)
+print("Valid data output:", result1.final_output)
 
-user_data = UserContext(username="arvind shrinvas", age="69")
-result = Runner.run_sync(agent, input="give me user data", context=user_data)
-
-
-print(agent.tools)
-
-print(result.final_output)
+# Case 2: Invalid data (age is missing)
+# invalid_context = '{"username": "john"}'
+# result2 = Runner.run_sync(agent, input="give me user data", context=invalid_context)
+# print("Invalid data output:", result2.final_output)
