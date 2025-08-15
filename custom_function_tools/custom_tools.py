@@ -10,6 +10,7 @@ from agents import (
     RunContextWrapper,
     FunctionTool,
     enable_verbose_stdout_logging,
+    ModelSettings
 )
 from typing import Any
 from openai import AsyncOpenAI
@@ -79,6 +80,7 @@ agent = Agent(
     model=model,
     tools=[user_data_tool],
     tool_use_behavior="stop_on_first_tool",
+    model_settings=ModelSettings()
 )
 
 # ====== TEST RUN ======
