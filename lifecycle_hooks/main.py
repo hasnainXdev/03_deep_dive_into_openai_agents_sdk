@@ -43,7 +43,7 @@ class MyAgentHooks(AgentHooks):
 
     async def on_end(self, context: RunContextWrapper, agent: Agent, output: any):
         print("called on_start")
-        print(f"Agent {agent.name} is ended!")  # ajeeeeeeeeeeb
+        print(f"Agent {agent.name} is ended!")
 
 
 # Create an Agent
