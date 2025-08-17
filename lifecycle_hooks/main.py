@@ -12,6 +12,7 @@ from agents import (
 from agents.lifecycle import AgentHooks, RunHooks
 
 from openai import AsyncOpenAI
+import asyncio
 
 # Load environment variables
 dotenv.load_dotenv()
@@ -39,9 +40,10 @@ class MyAgentHooks(AgentHooks):
     async def on_start(self, context: RunContextWrapper, agent: Agent):
         print("called on_start")
         print(f"Agent {agent.name} is starting to process your request!")
-    async def on_end(self, context: RunContextWrapper, agent: Agent):
+
+    async def on_end(self, context: RunContextWrapper, agent: Agent, output: any):
         print("called on_start")
-        print(f"Agent {agent.name} is ended!")
+        print(f"Agent {agent.name} is ended!")  # ajeeeeeeeeeeb
 
 
 # Create an Agent
@@ -53,5 +55,9 @@ agent = Agent(
 )
 
 
-result = Runner.run_sync(agent, input="2 + 2")
-print(result.final_output)
+async def main():
+    result = await Runner.run(agent, input="2 + 2")
+    print(result.final_output)
+
+
+asyncio.run(main())
