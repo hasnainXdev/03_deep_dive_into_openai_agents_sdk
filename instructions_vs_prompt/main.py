@@ -24,6 +24,7 @@ agent = Agent(
     name="Assistant",
     instructions="you are an AI assistant that helps with python programming cocepts shortly.",  # this is the system prompt for the agent that runs inside your code, the enable yoy to do anything you want, use case: for example -> you can pass code to the agent and it will review it and return the result...
     model=model,
+    # prompt={"id": "openai_platform_prompt_id"}
 )
 
 result = Runner.run_sync(
