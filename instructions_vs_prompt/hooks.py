@@ -4,7 +4,10 @@ from agents import (
     OpenAIChatCompletionsModel,
     set_tracing_disabled,
     ModelSettings,
+    AgentHooks,
+    RunContextWrapper,
 )
+from typing import Any
 from openai import AsyncOpenAI
 from dotenv import load_dotenv
 import os
@@ -26,13 +29,19 @@ model = OpenAIChatCompletionsModel(
 )
 
 
+class myAgentHook(AgentHooks):
+    async def on_start(self, ctx: RunContextWrapper[None], agent: Agent):
+        print(f"{agent.name} agent is started and ready to assist")
+
+    async def on_end(self, ctx: RunContextWrapper, agent: Agent, output: Any):
+        print(f"{agent.name} agent is ended")
+
+
 agent = Agent(
     name="Assistant",
     instructions="you are an AI assistant that helps with python programming cocepts shortly.",  # this is the system prompt for the agent that runs inside your code, the enable you to do anything you want, use case: for example -> you can pass code to the agent and it will review it and return the result...
     model=model,
-    prompt={
-        "id": "openai_platform_prompt_id"
-    },  # this is the prompt id similar to instructions, but this will run outside of your code and unlocking capablities like external/dynamic prompts
+    hooks=myAgentHook(),
 )
 
 result = Runner.run_sync(
