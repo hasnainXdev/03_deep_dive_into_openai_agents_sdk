@@ -8,6 +8,7 @@ from agents import (
     function_tool,
     set_tracing_disabled,
     RunContextWrapper,
+    Handoff
 )
 from agents.lifecycle import AgentHooks, RunHooks
 
@@ -42,12 +43,20 @@ def square_number(number: int) -> int:
 
 square_tool = function_tool(square_number)
 
+# ----- Python Agent -------
+python_agent = Agent(
+    name="PythonAgent",
+    instructions="You are a expert Python agent.",
+    handoff_description="use python agent for python related queries",
+    model=model,
+)
 
 # Create an Agent
 agent = Agent(
-    name="",
+    name="Assistant",
     instructions="You are a math assistant. Use the provided tools to perform calculations and explain results clearly.",
     model=model,
+    handoffs=[python_agent],
     tools=[square_tool],
 )
 
