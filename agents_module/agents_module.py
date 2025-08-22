@@ -43,30 +43,18 @@ def square_number(number: int) -> int:
 square_tool = function_tool(square_number)
 
 
-# Define a custom hook for lifecycle events
-class MyAgentHooks(AgentHooks):
-    async def on_agent_start(self, context: RunContextWrapper, agent: Agent):
-        print(f"Agent {agent.name} is starting to process your request!")
-
-
 # Create an Agent
 agent = Agent(
-    name="MathAssistant",
+    name="",
     instructions="You are a math assistant. Use the provided tools to perform calculations and explain results clearly.",
     model=model,
     tools=[square_tool],
-    hooks=MyAgentHooks,
 )
 
 
 # Run the agent
-async def run_math_assistant():
-    result = await Runner.run(
-        agent, input="Calculate the square of 5 and explain the result."
+result = Runner.run_sync(
+        agent, input="Hi there!"
     )
-    print("Agent Response:", result.final_output)
+print("Agent Response:", result.final_output)
 
-
-# Execute the async function
-if __name__ == "__main__":
-    asyncio.run(run_math_assistant())
